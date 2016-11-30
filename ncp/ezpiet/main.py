@@ -51,6 +51,14 @@ class COLOR:
         new_darkness = abs(darkness-color.y)
         return COLOR.grid[new_x][new_darkness]
 
+    def color_byname(name):
+        for supercolor in COLOR.grid:
+            for color in supercolor:
+                if color.name == name:
+                    return color
+        return None
+
+
 class Opcode:
 
     def __init__(self, token, shift_hue, shift_darkness):
@@ -67,6 +75,24 @@ class Opcode:
 
 def main():
     COLOR.create_grid()
+    code = input("CODE: ")
+    if
+    color_option = None
+    starting_color = None
+    while starting_color is None:
+        color_option = input("Starting Color (h for help): ")
+        if color_option == "h":
+            strbuild = ""
+            for supercolor in COLOR.grid:
+                for color in supercolor:
+                    strbuild += color.name + ";"
+            print("Possible colors: "+strbuild)
+        else:
+            starting_color = COLOR.color_byname(color_option)
+            if starting_color is None:
+                print("Invalid color")
+
+
     compile("in(number)-duplicate-mul-out(number)",2,2)
 
 
