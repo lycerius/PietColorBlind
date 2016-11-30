@@ -48,30 +48,68 @@ class COLOR:
         new_x = color.x
         for x in range(0,hue):
             new_x = (new_x + 1) % 6
-        new_darkness = abs(color.y-darkness)
+        new_darkness = abs(darkness-color.y)
         return COLOR.grid[new_x][new_darkness]
+
+class Opcode:
+
+    def __init__(self, token, shift_hue, shift_darkness):
+        self.token = token
+        self.shift_hue = shift_hue
+        self.shift_darkness = shift_darkness
+
+    def __equ__(self, token):
+        return self.token == token
+
+    def delta_color(self, current_color):
+        return COLOR.shift_color(current_color, self.shift_hue, self.shift_darkness)
+
 
 def main():
     COLOR.create_grid()
-    light_red = COLOR.get_color(0,0)
-    print(light_red.name)
-    new_color = COLOR.shift_color(light_red,1,0)
-    print(new_color.name)
-    new_new_color = COLOR.shift_color(new_color,6,0)
-    print(new_new_color.name)
-    create_plan("in(number)-in(number)")
+    compile("in(number)-duplicate-mul-out(number)",2,2)
 
-def create_plan(inputstring, startx=0, starty=0):
+
+def create_opcode_table():
+    op_list = set()
+    op_list.add(Opcode("push",0,1))
+    op_list.add(Opcode("pop",0,2))
+    op_list.add(Opcode("add",1,0))
+    op_list.add(Opcode("sub",1,1))
+    op_list.add(Opcode("mul",1,2))
+    op_list.add(Opcode("div",2,0))
+    op_list.add(Opcode("mod",2,1))
+    op_list.add(Opcode("not",2,2))
+    op_list.add(Opcode("greater",3,0))
+    op_list.add(Opcode("pointer",3,1))
+    op_list.add(Opcode("switch",3,2))
+    op_list.add(Opcode("duplicate",4,0))
+    op_list.add(Opcode("roll",4,1))
+    op_list.add(Opcode("in(number)",4,2))
+    op_list.add(Opcode("in(char)",5,0))
+    op_list.add(Opcode("out(number)",5,1))
+    op_list.add(Opcode("out(char)",5,2))
+    return op_list
+
+
+def compile(inputstring, startx=0, starty=0):
+    opcodes = create_opcode_table()
     proc = inputstring.split("-")
     currentcolor = COLOR.get_color(startx, starty)
     color_list = [currentcolor]
+
     for str in proc:
-        if str == "in(number)":
-            currentcolor = COLOR.shift_color(currentcolor, 5, 0)
-            color_list.append(currentcolor)
-        else:
-            print("Nope")
+        ok = False
+        for opcode in opcodes:
+            if opcode.token == str:
+                currentcolor = opcode.delta_color(currentcolor)
+                color_list.append(currentcolor)
+                ok = True
+                break
+        if not ok:
+            print("ERROR: "+str+" is an invalid opcode!")
             break
+
     for color in color_list:
         print(color.name)
 
